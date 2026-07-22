@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BetterPosters for Nuvio</title>
+  <style>
+    :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: #08090b; color: #f7f8fa; }
+    main { width: min(720px, calc(100% - 32px)); margin: 0 auto; padding: 56px 0 80px; }
+    header { display: flex; gap: 16px; align-items: center; margin-bottom: 36px; }
+    header img { width: 58px; height: 58px; border-radius: 15px; }
+    h1 { margin: 0 0 5px; font-size: clamp(26px, 5vw, 40px); letter-spacing: -.04em; }
+    header p, .muted { margin: 0; color: #9aa3b2; }
+    section { border: 1px solid #24272e; border-radius: 18px; padding: 22px; background: #101216; margin-top: 18px; }
+    h2 { margin: 0 0 9px; font-size: 17px; }
+    p { line-height: 1.55; }
+    label { display: block; margin: 22px 0 9px; font-weight: 700; }
+    textarea, input { width: 100%; border: 1px solid #343944; border-radius: 12px; background: #090a0d; color: #fff; padding: 14px; font: 14px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    textarea { min-height: 168px; resize: vertical; }
+    textarea:focus, input:focus { outline: 2px solid #4b9fff; outline-offset: 1px; }
+    .buttons { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+    button, a.button { border: 0; border-radius: 11px; padding: 12px 16px; font: inherit; font-weight: 750; cursor: pointer; text-decoration: none; color: #fff; background: #2c313a; }
+    button.primary, a.primary { background: linear-gradient(135deg, #238cf1, #7758f7); }
+    button:disabled { opacity: .55; cursor: wait; }
+    #result, #error { display: none; }
+    #error { border-color: #70343b; background: #1d1013; color: #ffb8c0; }
+    ol { padding-left: 22px; color: #cbd1da; }
+    code { color: #b9ddff; }
+    .small { font-size: 13px; }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <img src="/logo.svg" alt="">
+    <div><h1>BetterPosters</h1><p>Poster-default artwork for Nuvio on iOS and TV</p></div>
+  </header>
+
+  <section>
+    <h2>Wrap your Nuvio addons</h2>
+    <p class="muted">Enter one upstream addon manifest URL per line. Catalogs and metadata are passed through with IMDb-backed poster URLs replaced by <code>btttr.cc</code>. Streams and subtitles are aggregated unchanged.</p>
+    <label for="upstreams">Addon manifest URLs</label>
+    <textarea id="upstreams" spellcheck="false" placeholder="https://v3-cinemeta.strem.io/manifest.json"></textarea>
+    <div class="buttons"><button id="generate" class="primary">Generate addon URL</button></div>
+  </section>
+
+  <section id="error" role="alert"></section>
+
+  <section id="result">
+    <h2>Your addon is ready</h2>
+    <p id="addonNames" class="muted"></p>
+    <label for="manifestUrl">Manifest URL</label>
+    <input id="manifestUrl" readonly>
+    <div class="buttons">
+      <button id="copy">Copy for Nuvio</button>
+      <a id="install" class="button primary" href="#">Install in Stremio</a>
+    </div>
+  </section>
+
+  <section>
+    <h2>Install in Nuvio</h2>
+    <ol>
+      <li>Generate and copy the manifest URL above.</li>
+      <li>In Nuvio on iOS or TV, open <strong>Settings → Addons</strong> and add that URL.</li>
+      <li>Disable the original wrapped catalog addons to avoid duplicate catalog rows. If a stream addon was not included above, leave it installed normally.</li>
+    </ol>
+    <p class="muted small">Only media with an IMDb ID can use this BetterPosters URL format. Configuration tokens contain the addon URLs in reversible form; do not include URLs you consider secret on a shared deployment.</p>
+  </section>
+</main>
+<script>
+  const initialUpstreams = __INITIAL_UPSTREAMS_JSON__;
+  const textarea = document.querySelector("#upstreams");
+  const generate = document.querySelector("#generate");
+  const result = document.querySelector("#result");
+  const errorBox = document.querySelector("#error");
+  const manifestInput = document.querySelector("#manifestUrl");
+  const install = document.querySelector("#install");
+  const addonNames = document.querySelector("#addonNames");
+  textarea.value = initialUpstreams.length ? initialUpstreams.join("\n") : "https://v3-cinemeta.strem.io/manifest.json";
+
+  generate.addEventListener("click", async () => {
+    errorBox.style.display = "none";
+    result.style.display = "none";
+    generate.disabled = true;
+    generate.textContent = "Checking addons…";
+    try {
+      const upstreams = textarea.value.split(/\r?\n/).map(value => value.trim()).filter(Boolean);
+      const response = await fetch("/api/config", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ upstreams }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Could not create the addon URL.");
+      manifestInput.value = payload.manifestUrl;
+      install.href = payload.stremioUrl;
+      addonNames.textContent = `Wrapped: ${payload.addons.map(addon => addon.name).join(", ")}`;
+      result.style.display = "block";
+      result.scrollIntoView({ behavior: "smooth", block: "center" });
+    } catch (error) {
+      errorBox.textContent = error.message;
+      errorBox.style.display = "block";
+    } finally {
+      generate.disabled = false;
+      generate.textContent = "Generate addon URL";
+    }
+  });
+
+  document.querySelector("#copy").addEventListener("click", async (event) => {
+    await navigator.clipboard.writeText(manifestInput.value);
+    event.currentTarget.textContent = "Copied";
+    setTimeout(() => { event.currentTarget.textContent = "Copy for Nuvio"; }, 1200);
+  });
+</script>
+</body>
+</html>
