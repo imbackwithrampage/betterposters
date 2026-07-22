@@ -1,59 +1,35 @@
 # BetterPosters for Nuvio
 
-A self-hosted Nuvio/Stremio addon proxy that wraps existing addons and replaces IMDb-backed poster fields with:
+An unofficial Nuvio addon that gives IMDb-backed titles artwork from [BetterPosters](https://btttr.cc/).
+
+## Quick install: Cinemeta only
+
+Use this option if you normally use Cinemeta and just want its catalogs with BetterPosters artwork.
+
+**Copy this manifest URL:**
 
 ```text
-https://btttr.cc/poster/imdb/poster-default/{imdb_id}.jpg
+https://nuvio-better-posters.onrender.com/eyJ2ZXJzaW9uIjoxLCJ1cHN0cmVhbXMiOlsiaHR0cHM6Ly92My1jaW5lbWV0YS5zdHJlbS5pby9tYW5pZmVzdC5qc29uIl19/manifest.json
 ```
 
-It rewrites both `catalog` previews and full `meta` responses, so the artwork appears on Nuvio home/catalog surfaces as well as detail screens. Wrapped `stream` and `subtitles` responses are aggregated without modification.
+1. In Nuvio, open **Settings → Addons**.
+2. Add an addon using the manifest URL above.
+3. Disable your original Cinemeta addon to avoid duplicate catalog rows.
 
-## Why this is a proxy addon
+This link wraps **Cinemeta only**. It does not change posters supplied by your other installed addons.
 
-The addon protocol does not let one independently installed addon edit another addon's catalog response. Nuvio reads the `poster` URL directly from each catalog item. This service therefore republishes selected addons through one generated manifest and changes their poster fields in transit.
+## Use it with another addon
 
-## Run locally
+Open the [BetterPosters configurator](https://nuvio-better-posters.onrender.com/configure), enter the manifest URL of the addon you want to wrap, and copy the generated manifest URL into Nuvio.
 
-Requirements: Node.js 20 or newer.
+Do not enter private or secret addon URLs into the public configurator. Its generated configuration is encoded, not encrypted.
 
-```powershell
-npm test
-npm start
-```
+## What it does
 
-Open `http://127.0.0.1:7000/configure`, enter one upstream manifest URL per line, and generate the wrapper manifest.
+- Replaces poster URLs in wrapped catalog and metadata responses with `https://btttr.cc/poster/imdb/poster-default/{imdb_id}.jpg`.
+- Leaves streams and subtitles unchanged.
+- Keeps the original poster when a title has no IMDb ID.
 
-On Windows, `start-windows.cmd` starts the service and opens the configuration page.
+Because of how the addon protocol works, one addon cannot modify every other installed addon's posters. Each catalog addon must be wrapped separately, and already cached or Nuvio-native artwork may remain unchanged.
 
-For use on a TV, deploy the service at a public HTTPS URL. A localhost URL on your PC will not normally be reachable or accepted by a TV client.
-
-## Deploy
-
-### Docker
-
-```powershell
-docker build -t nuvio-better-posters .
-docker run --rm -p 7000:7000 nuvio-better-posters
-```
-
-### Render
-
-This repository includes `render.yaml`. Push this folder to a Git repository and create a Render Blueprint. `PUBLIC_BASE_URL` is optional; set it only if a reverse proxy does not forward the original public host correctly.
-
-## Install in Nuvio
-
-1. Open the deployed `/configure` page.
-2. Add the manifest URLs for the catalog/metadata addons you want decorated. Stream-only addons can also be added if you want the wrapper to aggregate them.
-3. Copy the generated manifest URL.
-4. In Nuvio on iOS and TV, open **Settings → Addons** and add the URL.
-5. Disable original wrapped catalog addons to avoid duplicate rows. Leave any stream addons that were not wrapped installed normally.
-
-You can alternatively set `UPSTREAM_ADDONS` to newline-separated URLs. That creates a fixed endpoint at `/manifest.json` without a configuration token.
-
-## Limits and safety
-
-- The BetterPosters URL requires an IMDb ID. Items whose `id`, IMDb fields, or poster URL contain no IMDb ID keep their original poster.
-- An addon cannot change Nuvio-native sources or already cached library artwork that never passes through an addon catalog/meta response.
-- Generated configuration tokens are encoded, not encrypted. Do not put secret addon URLs into a shared public deployment.
-- Public deployments block private/LAN upstream hosts to reduce SSRF risk. Set `ALLOW_PRIVATE_UPSTREAMS=1` only on a trusted private deployment that intentionally wraps local addons.
-- Poster images are loaded directly from `btttr.cc`; that service's availability and caching behavior apply.
+This project is unofficial and is not affiliated with Nuvio, Cinemeta, Stremio, or BetterPosters.
