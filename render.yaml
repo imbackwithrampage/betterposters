@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: nuvio-better-posters
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: ALLOW_PRIVATE_UPSTREAMS
+        value: "0"
