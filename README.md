@@ -27,7 +27,7 @@ Do not enter private or secret addon URLs into the public configurator. Its gene
 ## What it does
 
 - Replaces poster URLs in wrapped catalog and metadata responses with `https://btttr.cc/poster/imdb/poster-default/{imdb_id}.jpg?fallback=true`.
-- Leaves streams and subtitles unchanged.
+- Excludes streams and subtitles, serving catalog and metadata responses only.
 - Keeps the original poster when a title has no IMDb ID.
 
 Because of how the addon protocol works, one addon cannot modify every other installed addon's posters. Each catalog addon must be wrapped separately, and already cached or Nuvio-native artwork may remain unchanged.

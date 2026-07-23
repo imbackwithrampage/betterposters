@@ -8,7 +8,7 @@ import {
   supportsResource,
 } from "./upstreams.js";
 
-const PROXIED_RESOURCES = ["meta", "stream", "subtitles"];
+const PROXIED_RESOURCES = ["meta"];
 
 export function encodeCatalogId(upstreamIndex, catalogId) {
   return `bp_${upstreamIndex}_${Buffer.from(catalogId, "utf8").toString("base64url")}`;
