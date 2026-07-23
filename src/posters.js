@@ -20,8 +20,6 @@ export function findImdbId(meta) {
     meta.external_ids?.imdb_id,
     meta.behaviorHints?.imdbId,
     meta.poster,
-    Array.isArray(meta.videos) ? meta.videos[0]?.id : null,
-    Array.isArray(meta.videos) ? meta.videos[0]?.imdb_id : null,
   ];
   for (const candidate of candidates) {
     const id = imdbIdFrom(candidate);
@@ -38,44 +36,13 @@ export function betterPosterUrl(imdbId) {
 export function rewriteMetaObject(meta) {
   if (!meta || typeof meta !== "object" || Array.isArray(meta)) return meta;
   const imdbId = findImdbId(meta);
+  if (!imdbId) return meta;
 
-  const rewritten = { ...meta };
-
-  if (imdbId) {
-    rewritten.poster = betterPosterUrl(imdbId);
-    rewritten.posterShape = "poster";
-    rewritten.imdb_id = meta.imdb_id || imdbId;
-    rewritten.imdbId = meta.imdbId || imdbId;
-  }
-
-  if (Array.isArray(meta.videos)) {
-    rewritten.videos = meta.videos.map((video) => {
-      if (!video || typeof video !== "object" || Array.isArray(video)) return video;
-
-      const videoImdbId = imdbIdFrom(video.id) || imdbIdFrom(video.imdb_id) || imdbId;
-      const season = video.season ?? video.seasonNum;
-      const episode = video.episode ?? video.episodeNum ?? video.number;
-
-      if (!videoImdbId && season == null) return video;
-
-      const updatedVideo = { ...video };
-
-      if (videoImdbId) {
-        updatedVideo.imdb_id = video.imdb_id || videoImdbId;
-        updatedVideo.imdbId = video.imdbId || videoImdbId;
-      }
-      if (season != null) {
-        updatedVideo.imdbSeason = video.imdbSeason ?? season;
-      }
-      if (episode != null) {
-        updatedVideo.imdbEpisode = video.imdbEpisode ?? episode;
-      }
-
-      return updatedVideo;
-    });
-  }
-
-  return rewritten;
+  return {
+    ...meta,
+    poster: betterPosterUrl(imdbId),
+    posterShape: "poster",
+  };
 }
 
 export function rewriteCatalogResponse(payload) {
