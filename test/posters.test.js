@@ -30,9 +30,26 @@ test("rewrites every IMDb-backed catalog poster without changing non-IMDb items"
   assert.equal(original.metas[0].poster, "old.jpg");
 });
 
-test("rewrites full metadata responses", () => {
+test("rewrites full metadata responses and binds episode IMDb IDs", () => {
   const response = rewriteMetaResponse({
-    meta: { id: "tt0903747", type: "series", name: "Breaking Bad", poster: "old.jpg" },
+    meta: {
+      id: "tmdb:1396",
+      type: "series",
+      name: "Breaking Bad",
+      externalIds: { imdb: "tt0903747" },
+      poster: "old.jpg",
+      videos: [
+        { id: "tmdb:1396:1:1", season: 1, episode: 1, title: "Pilot" },
+        { id: "tt0903747:1:2", season: 1, episode: 2, title: "Cat's in the Bag..." },
+      ],
+    },
   });
+
   assert.equal(response.meta.poster, "https://btttr.cc/poster/imdb/poster-default/tt0903747.jpg?fallback=true");
+  assert.equal(response.meta.imdb_id, "tt0903747");
+  assert.equal(response.meta.videos[0].id, "tt0903747:1:1");
+  assert.equal(response.meta.videos[0].imdb_id, "tt0903747");
+  assert.equal(response.meta.videos[0].imdbSeason, 1);
+  assert.equal(response.meta.videos[0].imdbEpisode, 1);
+  assert.equal(response.meta.videos[1].id, "tt0903747:1:2");
 });
