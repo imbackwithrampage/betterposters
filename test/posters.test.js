@@ -47,7 +47,7 @@ test("rewrites full metadata responses and binds episode IMDb IDs", () => {
 
   assert.equal(response.meta.poster, "https://btttr.cc/poster/imdb/poster-default/tt0903747.jpg?fallback=true");
   assert.equal(response.meta.imdb_id, "tt0903747");
-  assert.equal(response.meta.videos[0].id, "tt0903747:1:1");
+  assert.equal(response.meta.videos[0].id, "tmdb:1396:1:1");
   assert.equal(response.meta.videos[0].imdb_id, "tt0903747");
   assert.equal(response.meta.videos[0].imdbSeason, 1);
   assert.equal(response.meta.videos[0].imdbEpisode, 1);

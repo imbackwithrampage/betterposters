@@ -40,7 +40,7 @@ test("builds a Nuvio-compatible aggregate manifest", () => {
   assert.match(manifest.catalogs[0].name, /BetterPosters \(One\)/);
   assert.deepEqual(decodeCatalogId(manifest.catalogs[0].id), { upstreamIndex: 0, catalogId: "popular" });
   assert.ok(manifest.resources.some((resource) => resource.name === "meta"));
-  assert.ok(!manifest.resources.some((resource) => resource.name === "stream"));
+  assert.ok(manifest.resources.some((resource) => resource.name === "stream"));
   assert.deepEqual(decodeCatalogId(encodeCatalogId(3, "catalog/with symbols")), {
     upstreamIndex: 3,
     catalogId: "catalog/with symbols",

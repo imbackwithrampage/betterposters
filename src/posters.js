@@ -62,20 +62,13 @@ export function rewriteMetaObject(meta) {
 
       if (videoImdbId) {
         updatedVideo.imdb_id = video.imdb_id || videoImdbId;
+        updatedVideo.imdbId = video.imdbId || videoImdbId;
       }
       if (season != null) {
         updatedVideo.imdbSeason = video.imdbSeason ?? season;
       }
       if (episode != null) {
         updatedVideo.imdbEpisode = video.imdbEpisode ?? episode;
-      }
-
-      if (videoImdbId && season != null && episode != null) {
-        const expectedImdbEpisodeId = `${videoImdbId}:${season}:${episode}`;
-        if (typeof video.id === "string" && !video.id.toLowerCase().startsWith("tt")) {
-          updatedVideo.originalId = video.id;
-          updatedVideo.id = expectedImdbEpisodeId;
-        }
       }
 
       return updatedVideo;
