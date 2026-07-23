@@ -23,9 +23,9 @@ test("rewrites every IMDb-backed catalog poster without changing non-IMDb items"
   };
   const rewritten = rewriteCatalogResponse(original);
 
-  assert.equal(rewritten.metas[0].poster, "https://btttr.cc/poster/imdb/poster-default/tt0111161.jpg");
+  assert.equal(rewritten.metas[0].poster, "https://btttr.cc/poster/imdb/poster-default/tt0111161.jpg?fallback=true");
   assert.equal(rewritten.metas[0].posterShape, "poster");
-  assert.equal(rewritten.metas[1].poster, "https://btttr.cc/poster/imdb/poster-default/tt0068646.jpg");
+  assert.equal(rewritten.metas[1].poster, "https://btttr.cc/poster/imdb/poster-default/tt0068646.jpg?fallback=true");
   assert.equal(rewritten.metas[2].poster, "keep.jpg");
   assert.equal(original.metas[0].poster, "old.jpg");
 });
@@ -34,5 +34,5 @@ test("rewrites full metadata responses", () => {
   const response = rewriteMetaResponse({
     meta: { id: "tt0903747", type: "series", name: "Breaking Bad", poster: "old.jpg" },
   });
-  assert.equal(response.meta.poster, "https://btttr.cc/poster/imdb/poster-default/tt0903747.jpg");
+  assert.equal(response.meta.poster, "https://btttr.cc/poster/imdb/poster-default/tt0903747.jpg?fallback=true");
 });

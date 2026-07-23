@@ -80,10 +80,10 @@ test("serves a generated manifest and rewrites catalog/meta posters end to end",
     const configuredBase = generated.manifestUrl.replace(/\/manifest\.json$/, "");
 
     const catalog = await fetch(`${configuredBase}/catalog/movie/${catalogId}/skip=0.json`).then((response) => response.json());
-    assert.equal(catalog.metas[0].poster, "https://btttr.cc/poster/imdb/poster-default/tt0111161.jpg");
+    assert.equal(catalog.metas[0].poster, "https://btttr.cc/poster/imdb/poster-default/tt0111161.jpg?fallback=true");
 
     const meta = await fetch(`${configuredBase}/meta/movie/tt0111161.json`).then((response) => response.json());
-    assert.equal(meta.meta.poster, "https://btttr.cc/poster/imdb/poster-default/tt0111161.jpg");
+    assert.equal(meta.meta.poster, "https://btttr.cc/poster/imdb/poster-default/tt0111161.jpg?fallback=true");
 
     const streams = await fetch(`${configuredBase}/stream/movie/tt0111161.json`).then((response) => response.json());
     assert.deepEqual(streams.streams, [{ url: "https://video.example/movie.mp4" }]);

@@ -30,7 +30,7 @@ export function findImdbId(meta) {
 
 export function betterPosterUrl(imdbId) {
   const normalized = imdbIdFrom(imdbId);
-  return normalized ? `${BETTER_POSTERS_BASE}/${normalized}.jpg` : null;
+  return normalized ? `${BETTER_POSTERS_BASE}/${normalized}.jpg?fallback=true` : null;
 }
 
 export function rewriteMetaObject(meta) {
