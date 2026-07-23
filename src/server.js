@@ -17,7 +17,7 @@ import {
 const CONFIGURE_TEMPLATE = readFileSync(new URL("../public/configure.html", import.meta.url), "utf8");
 const LOGO_SVG = readFileSync(new URL("../public/logo.svg", import.meta.url), "utf8");
 const MAX_REQUEST_BODY_BYTES = 128 * 1024;
-const RESOURCE_NAMES = new Set(["catalog", "meta", "stream", "subtitles"]);
+const RESOURCE_NAMES = new Set(["catalog", "meta"]);
 
 class HttpError extends Error {
   constructor(statusCode, message) {
@@ -230,10 +230,7 @@ export function createBetterPostersServer(options = {}) {
         rawExtraSegment: route.rawExtraSegment,
         fetchOptions,
       });
-      const cacheControl = route.resource === "stream"
-        ? "public, max-age=15"
-        : "public, max-age=300";
-      sendJson(response, 200, payload, cacheControl);
+      sendJson(response, 200, payload, "public, max-age=300");
     } catch (error) {
       const statusCode = statusForError(error);
       sendJson(response, statusCode, { error: error?.message ?? "Unexpected addon error." });
